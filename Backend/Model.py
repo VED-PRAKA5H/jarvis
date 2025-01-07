@@ -1,20 +1,27 @@
-import cohere
-from rich import print
-from dotenv import dotenv_values
+import cohere  # Import the Cohere library for accessing its API
+from rich import print  # Import the print function from the rich library for enhanced console output
+from dotenv import load_dotenv  # Import load_dotenv to load environment variables from a .env file
+import os  # Import os module to interact with the operating system
 
-env_vars = dotenv_values(".env")
+# Load environment variables from the .env file
+load_dotenv()
 
-CohereAPIkey = env_vars.get("CohereAPIKey")
+# Retrieve the Cohere API key from environment variables
+CohereAPIkey = os.getenv("CohereAPIKey")
 
+# Initialize the Cohere client with the retrieved API key
 co = cohere.Client(api_key=CohereAPIkey)
 
+# Define a list of functions that the model can recognize and respond to
 functions = [
     'exit', 'general', 'realtime', 'open', 'close', 'play', 'generate image', 'system',
     'content', 'google search', 'youtube search', 'reminder'
 ]
 
+# Initialize an empty list to store messages exchanged between user and chatbot
 messages = []
 
+# Define a preamble that describes the decision-making model's purpose and query categorization rules
 preamble = """
 You are a very accurate Decision-Making Model, which decides what kind of a query is given to you.
 You will decide whether a query is a 'general' query, a 'realtime' query, or is asking to perform any task or automation like 'open facebook, instagram', 'can you write a application and open it in notepad'
@@ -35,6 +42,7 @@ You will decide whether a query is a 'general' query, a 'realtime' query, or is 
 *** Respond with 'general (query)' if you can't decide the kind of query or if a query is asking to perform a task which is not mentioned above. ***
 """
 
+# Initialize chat history with predefined user and chatbot interactions
 ChatHistory = [
     {"role": "User", "message": "how are you?"},
     {"role": "Chatbot", "message": "general how are you?"},
@@ -44,12 +52,61 @@ ChatHistory = [
     {"role": "Chatbot", "message": "open chrome, general tell me about mahatma gandhi."},
     {"role": "User", "message": "open chrome and edge."},
     {"role": "Chatbot", "message": "open chrome, open edge."},
-    {"role": "User", "message": "what is today's date and by the way remind me that I have a class on 9th Jan at 09 AM."},
-    {"role": "Chatbot", "message": "general what is today's date, reminder 11:00 PM 5th Aug dancing performance."},
+    {"role": "User",
+     "message": "what is today's date and by the way remind me that I have a class on 9th Jan at 09 AM."},
+    {"role": "Chatbot", "message": "general what is today's date, reminder for class on 9th Jan at 09 AM."},
     {"role": "User", "message": "chat with me."},
     {"role": "Chatbot", "message": "general chat with me."}
 ]
 
 
-def FirstLayerDMM(promt: str= 'test'):
+# Define a function to process user prompts and categorize them accordingly
+def FirstLayerDMM(promt: str = 'test'):
+    # Append the user prompt to the messages list for tracking conversation history
     messages.append({"role": "user", 'content': f"{promt}"})
+
+    # Stream chat responses from the Cohere API based on user input
+    stream = co.chat_stream(
+        model='command-r-plus',
+        message=promt,
+        temperature=0.7,  # Controls randomness in responses; higher values yield more varied responses
+        chat_history=ChatHistory,  # Include previous chat history for context
+        prompt_truncation='OFF',  # Prevent truncation of prompts
+        connectors=[],  # Specify any connectors if needed (currently empty)
+        preamble=preamble  # Include preamble for guiding response generation
+    )
+
+    response = ""  # Initialize an empty string to accumulate responses
+
+    # Iterate through events in the response stream
+    for event in stream:
+        if event.event_type == 'text-generation':  # Check if the event type is text generation
+            response += event.text  # Append generated text to response
+
+    # Clean up response formatting by removing newlines and splitting by commas
+    response = response.replace('\n', '')
+    response = response.split(',')
+
+    # Strip whitespace from each item in the response list
+    response = [i.strip() for i in response]
+
+    temp = []  # Temporary list to hold categorized tasks
+
+    # Categorize each task based on predefined functions
+    for task in response:
+        for f in functions:
+            if task.startswith(f):  # Check if task starts with any recognized function name
+                temp.append(task)  # Add recognized task to temporary list
+
+    response = temp  # Update response to only include categorized tasks
+
+    if '(query)' in response:  # Check if response contains unresolved queries
+        response = FirstLayerDMM(promt=promt)  # Recursively call function for further processing
+    else:
+        return response  # Return final categorized responses
+
+
+# Main loop for continuous interaction with the user
+if __name__ == '__main__':
+    while True:
+        print(FirstLayerDMM(input("$ ")))  # Prompt user for input and display categorized responses
