@@ -1,4 +1,3 @@
-# available in pip but not in conda
 Appopener
 cohere
 edge-tts
@@ -10,12 +9,11 @@ pygame
 PyQt5
 pywhatkit
 webdriver-manager
-
-# available in conda
 python-dotenv
 bs4
 pillow
 rich
 requests
 selenium
+exceptiongroup
 
