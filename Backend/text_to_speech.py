@@ -110,3 +110,5 @@ if __name__ == "__main__":
     while True:
         user_input = input('Enter the text: ')  # Prompt user for input text
         text_to_speech(user_input)  # Convert input text to speech
+        # tts(user_input) call tts you want voice of large text comment above line and uncomment this line
+
