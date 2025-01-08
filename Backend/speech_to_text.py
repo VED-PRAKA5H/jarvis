@@ -17,19 +17,62 @@ input_language = os.getenv('InputLanguage')
 html_code = '''<!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speech Recognition</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #start {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #end {
+            background-color: #f44336;
+            color: white;
+        }
+
+        #output {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
     <button id="start" onclick="startRecognition()">Start Recognition</button>
     <button id="end" onclick="stopRecognition()">Stop Recognition</button>
-    <p id="output"></p>
+    <div id="output"></div>
     <script>
         const output = document.getElementById('output');
         let recognition;
 
         function startRecognition() {
-            recognition = new webkitSpeechRecognition() || new SpeechRecognition();
-            recognition.lang = '';
+            recognition = new (window.webkitSpeechRecognition || window.SpeechRecognition)();
+            recognition.lang = 'en-US';
             recognition.continuous = true;
 
             recognition.onresult = function(event) {
@@ -49,7 +92,8 @@ html_code = '''<!DOCTYPE html>
         }
     </script>
 </body>
-</html>'''
+</html>
+'''
 
 # Replace the empty language string in HTML with the input language from environment variables
 html_code = str(html_code).replace("recognition.lang = '';", f"recognition.lang = '{input_language}';")
@@ -69,7 +113,7 @@ user_agent_string = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.3
 chrome_options.add_argument(f"user-agent={user_agent_string}")  # Set user agent
 chrome_options.add_argument("--use-fake-ui-for-media-stream")  # Use fake UI for media stream permissions
 chrome_options.add_argument("--use-fake-device-for-media-stream")  # Use fake device for media stream
-# chrome_options.add_argument("--headless=new")  # Run Chrome in headless mode
+chrome_options.add_argument("--headless=new")  # Run Chrome in headless mode (comment this to make chrome pop up)
 
 # Initialize the Chrome WebDriver using ChromeDriverManager
 service_instance = Service(ChromeDriverManager().install())
