@@ -32,3 +32,4 @@ professional_responses = [
 ]
 
 messages = []
+system_chatbot = [{'role': 'system', 'content': f"Hello, I am {os.environ['Username']}, You are a content writer "}]
