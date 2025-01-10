@@ -10,7 +10,6 @@ load_dotenv()
 
 # Retrieve environment variable for Assistant name
 Assistantname = os.getenv('Assistantname')
-data_path = os.getcwd()  # Get the current working directory
 old_chat_messages = ""  # Variable to store previous chat messages
 temp_dir_path = "./Files"  # Path for temporary files
 graphics_dir_path = "./Graphics"  # Path for graphic files
@@ -44,26 +43,26 @@ def query_modifier(query):
 
 def set_microphone_status(command):
     """Writes the microphone status to a file."""
-    with open(f"{data_path}/Mic.data", 'w', encoding='utf-8') as file:
+    with open(f"{temp_dir_path}/Mic.data", 'w', encoding='utf-8') as file:
         file.write(command)
 
 def get_microphone_status():
     """Reads the microphone status from a file."""
     try:
-      with open(f"{data_path}/Mic.data", 'r', encoding='utf-8') as file:
+      with open(f"{temp_dir_path}/Mic.data", 'r', encoding='utf-8') as file:
           return file.read()
     except FileNotFoundError:
         return "False"  # Or some other default
 
 def set_assistant_status(command):
     """Writes the assistant status to a file."""
-    with open(f"{data_path}/Status.data", 'w', encoding='utf-8') as file:
+    with open(f"{temp_dir_path}/Status.data", 'w', encoding='utf-8') as file:
         file.write(command)
 
 def get_assistant_status():
   """Reads the assistant status from a file."""
   try:
-    with open(f"{data_path}/Status.data", 'r', encoding='utf-8') as file:
+    with open(f"{temp_dir_path}/Status.data", 'r', encoding='utf-8') as file:
         return file.read()
   except FileNotFoundError:
         return ""  # Or some other default
@@ -115,7 +114,7 @@ class ChatSection(QWidget):
 
         self.gif_label = QLabel()
         self.gif_label.setStyleSheet("border: none;")
-        movie = QMovie(graphics_dirctory_path('Jarvis.gif'))
+        movie = QMovie(graphics_dirctory_path('Jarvis2.gif'))
         max_gif_size_w = 480
         max_gif_size_h = 270
         movie.setScaledSize(QSize(max_gif_size_w, max_gif_size_h))
@@ -241,7 +240,9 @@ class InitialScreen(QWidget):
         content_layout.setContentsMargins(0, 0, 0, 0)
 
         gif_label = QLabel()
-        movie = QMovie(graphics_dirctory_path('Jarvis.gif'))
+        movie = QMovie(graphics_dirctory_path('Jarvis2.gif'))
+        # Set background color to #030217
+        self.setStyleSheet("background-color: #030217;")
         gif_label.setMovie(movie)
         gif_width = 800
         gif_height = 600
